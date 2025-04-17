@@ -9,14 +9,20 @@ class MyApp(ttk.Frame):
         super().__init__(master)
         self.master = master
         self.grid()
+        # Inicjalizacja kontenera
+        self.numbers = []
         self.create_widgets()
         #Inicjalizacja zmiennej która przechowuje operacje na zmiennych w kontenerze
         self.operation = None
-        # Inicjalizacja kontenera
-        self.numbers = []
+        
         #flaga do resetowania wartości w entry_var dla lepszego efektu
         self.reset_entry_flag = False
-        
+    
+    def clear_all(self):
+        '''Czyszczenie rejestru kalkulatora.'''
+        self.numbers = []
+        self.entry_var.set(value= '0')
+
     def numbers_append(self, math_operation = None):
         '''Dodanie wartości do kontenera po naciśnięciu klawiszy działania'''
         if math_operation != None:
@@ -25,6 +31,7 @@ class MyApp(ttk.Frame):
         self.numbers.append(detect_type(self.entry_var.get()))
         #self.entry_var.set('0')
         self.reset_entry_flag = True
+        self.temp_var.set(', '.join(map(str, self.numbers)))
     
     def insert_digit(self, digit):
         ''' Metoda wstawienia cyfry do głównej etykiety 'entry'.'''
@@ -41,14 +48,18 @@ class MyApp(ttk.Frame):
     
     def count(self):
         '''Metoda liczenia elementów kontenera - naciśnięcie przycisku '=' lub kolejnej operacji 'self.operation'.'''
-        if not self.entry_var.get() in ('', '0'):
+        if not self.entry_var.get() == '':
             self.numbers_append()
         if len(self.numbers) == 1:
             self.entry_var.set(str(self.numbers[0]))
         elif len(self.numbers) > 1:
-            result = self.operation(self.numbers[-2], self.numbers[-1])
-            self.numbers = [result]
-            self.entry_var.set(str(self.numbers[-1]))
+            try:
+                result = self.operation(self.numbers[-2], self.numbers[-1])
+            except ZeroDivisionError:
+                self.entry_var.set('Dzielenie przez zero!!!')
+            else:
+                self.numbers.append(result)
+                self.entry_var.set(str(self.numbers[-1]))
         
     def insert_dot(self):
         '''Metoda wstawienia kropki(separatora dziesiętnego) do etykiety 'entry'.'''
@@ -69,7 +80,7 @@ class MyApp(ttk.Frame):
         self.clear_digit = ttk.Button(self, text = 'CE', command=None)
         self.clear_digit.grid(row=1, column = 1, padx=2, pady=2)
         #Dodanie przycisku C
-        self.clear_all= ttk.Button(self, text = 'C', command=None)
+        self.clear_all= ttk.Button(self, text = 'C', command=self.clear_all)
         self.clear_all.grid(row=1, column = 2, padx=2, pady=2)
         #Dodanie przycisku backspace
         self.deletebtn = ttk.Button(self, text = 'DEL', command=self.clear_last_digit)
@@ -112,7 +123,10 @@ class MyApp(ttk.Frame):
         self.make_equal = ttk.Button(self, text = '=', command=self.count)
         self.make_equal.grid(row=6, column=3, padx=2, pady=2)
         
-   
+        #etykieta tymczasowa
+        self.temp_var = StringVar()
+        self.temp= ttk.Label(self, anchor= 'center', background='white', foreground='black', textvariable=self.temp_var)
+        self.temp.grid(row=7, column=0, columnspan= 4, sticky='EW', padx=5, pady=5)
         
 root = Tk()
 root.title('Caculator')
