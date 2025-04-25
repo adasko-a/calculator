@@ -58,6 +58,7 @@ class MyApp(ttk.Frame):
             except ZeroDivisionError:
                 self.entry_var.set('Dzielenie przez zero!!!')
             else:
+                self.numbers.clear() 
                 self.numbers.append(result)
                 self.entry_var.set(str(self.numbers[-1]))
         
